@@ -35,6 +35,7 @@ public class Pipe : MonoBehaviour
 
     public bool fill = false;
     public bool locked = false;
+    public bool fillComplete = false;
 
     public void Reveal()
     {
@@ -60,6 +61,7 @@ public class Pipe : MonoBehaviour
 
     public void GetNextFillTiles()
     {
+        fill = false;
         List<Pipe> nextPipes = new List<Pipe>();
 
         foreach(TileConnections connection in connections)
@@ -70,11 +72,12 @@ public class Pipe : MonoBehaviour
 
                 if (temp)
                 {
-                    if (!temp.hidden)
+                    if (!temp.hidden && !fillComplete)
                     {
                         // This is a crazy line of code, basically checks the next tile to see if the connection in the opposite direction is possible
                         if (temp.connections[(int)GetOppositeNeighbour(connection.direction)].canConnect)
                         {
+                            
                             nextPipes.Add(temp);
                         }
                     }
@@ -85,8 +88,10 @@ public class Pipe : MonoBehaviour
 
         foreach(Pipe temp in nextPipes)
         {
+            //Debug.Log(temp.coordinates);
             temp.fill = true;
         }
+        fillComplete = true;
     }
 
     public Pipe[] GetNeighboursArray()

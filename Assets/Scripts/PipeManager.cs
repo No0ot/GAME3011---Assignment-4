@@ -26,7 +26,7 @@ public class PipeManager : MonoBehaviour
 
     public Pipe GeneratePipe()
     {
-        Pipe temp = Instantiate(pipePrefabs[Random.Range(0, pipePrefabs.Length)]);
+        Pipe temp = Instantiate(pipePrefabs[Random.Range(0, 6)]);
         return temp;
     }
 

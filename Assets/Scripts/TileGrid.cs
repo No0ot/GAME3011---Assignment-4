@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class TileGrid : MonoBehaviour
 {
@@ -8,6 +9,18 @@ public class TileGrid : MonoBehaviour
     public static float tileSize;
 
     public GameObject pipePrefab;
+
+    [Serializable]
+    public struct TileArray
+    {
+        TileArray(int arraySize)
+        {
+            rowTiles = new Pipe[arraySize];
+        }
+        public Pipe[] rowTiles;
+    }
+    public TileArray[] debugArray;
+
 
     public Pipe[,] tileList;
 
@@ -23,24 +36,35 @@ public class TileGrid : MonoBehaviour
 
     void Start()
     {
-        tileList = new Pipe[gridSize.x, gridSize.y];
+        tileList = new Pipe[gridSize.x + 1, gridSize.y + 1];
         RegenerateGrid();
         CreateStartAndEndPipes();
         startPipe.fill = true;
-    }
 
-    private void RegenerateGrid()
-    {
-        for(int i = 0, k = 0; i < gridSize.x; i++)
+        debugArray = new TileArray[gridSize.y + 1];
+
+        for (int i = 0; i < gridSize.x + 1; i++)
         {
-            for(int j = 0; j < gridSize.y; j++)
+            debugArray[i].rowTiles = new Pipe[gridSize.x + 1];
+            for (int j = 0; j < gridSize.y + 1; j++)
             {
-                GenerateTile(i, j, k++);
+                debugArray[i].rowTiles[j] = tileList[i, j];
             }
         }
     }
 
-    private void GenerateTile(int x, int y, int index)
+    private void RegenerateGrid()
+    {
+        for(int i = 0; i < gridSize.x; i++)
+        {
+            for(int j = 0; j < gridSize.y; j++)
+            {
+                GenerateTile(i, j);
+            }
+        }
+    }
+
+    private void GenerateTile(int x, int y)
     {
         Pipe temp = pipeManager.GeneratePipe();
         //Tile temp = Instantiate(tilePrefab, this.transform);
@@ -62,11 +86,11 @@ public class TileGrid : MonoBehaviour
 
     public void CreateStartAndEndPipes()
     {
-        int startSide = Random.Range(0, 2);
+        int startSide = UnityEngine.Random.Range(0, 2);
 
         if(startSide > 0)
         {
-            int x = Random.Range(0, gridSize.x);
+            int x = UnityEngine.Random.Range(0, gridSize.x);
 
             Pipe pipeTemp = pipeManager.GeneratePipe(1);
             pipeTemp.transform.position = new Vector3(x * tileSize, -1 * tileSize);
@@ -78,7 +102,7 @@ public class TileGrid : MonoBehaviour
         }
         else
         {
-            int y = Random.Range(0, gridSize.y);
+            int y = UnityEngine.Random.Range(0, gridSize.y);
             Pipe pipeTemp = pipeManager.GeneratePipe(0);
             pipeTemp.transform.position = new Vector3(-1 * tileSize, y * tileSize);
             startPipe = pipeTemp;
@@ -91,24 +115,28 @@ public class TileGrid : MonoBehaviour
         startPipe.Reveal();
         startPipe.locked = true;
 
-        int endSide = Random.Range(0, 2);
+        int endSide = UnityEngine.Random.Range(0, 2);
 
         if(endSide > 0)
         {
-            int x = Random.Range(0, gridSize.x);
+            int x = UnityEngine.Random.Range(0, gridSize.x);
 
             Pipe pipeTemp = pipeManager.GeneratePipe(1);
             pipeTemp.transform.position = new Vector3(x * tileSize, (gridSize.y) * tileSize);
             endPipe = pipeTemp;
+            endPipe.coordinates = new Vector2Int(x, gridSize.y);
         }
         else
         {
-            int y = Random.Range(0, gridSize.y);
+            int y = UnityEngine.Random.Range(0, gridSize.y);
             Pipe pipeTemp = pipeManager.GeneratePipe(0);
             pipeTemp.transform.position = new Vector3((gridSize.x) * tileSize, y * tileSize);
             endPipe = pipeTemp;
+            endPipe.coordinates = new Vector2Int(gridSize.x, y);
         }
 
+        tileList[endPipe.coordinates.x, endPipe.coordinates.y] = endPipe;
+        Debug.Log(tileList[endPipe.coordinates.x, endPipe.coordinates.y].coordinates);
         endPipe.Reveal();
         endPipe.locked = true;
     }
@@ -137,28 +165,30 @@ public class TileGrid : MonoBehaviour
 
     public Pipe GetNextTileInDirection(Vector2Int initial, TileDirections direction)
     {
+        
         switch(direction)
         {
             case TileDirections.UP:
-                if (initial.y + 1 < gridSize.y)
+                if (initial.y + 1 < gridSize.y + 1)
                 {
+                    Debug.Log(tileList[initial.x, initial.y + 1].coordinates);
                     return tileList[initial.x, initial.y + 1];
                 }
                 break;
             case TileDirections.LEFT:
-                if (initial.x - 1 > 0)
+                if (initial.x - 1 >= 0)
                 {
                     return tileList[initial.x - 1, initial.y];
                 }
                 break;
             case TileDirections.DOWN:
-                if (initial.y - 1 > 0)
+                if (initial.y - 1 >= 0)
                 {
                     return tileList[initial.x, initial.y - 1];
                 }
                 break;
             case TileDirections.RIGHT:
-                if (initial.x + 1 < gridSize.x)
+                if (initial.x + 1 < gridSize.x + 1)
                 {
                     return tileList[initial.x + 1, initial.y];
                 }
@@ -166,18 +196,4 @@ public class TileGrid : MonoBehaviour
         }
         return null;
     }
-
-    //public Pipe GetTileFromCoordinates(Vector2Int coordinates)
-    //{
-    //    int iX = coordinates.x;
-    //    int iY = coordinates.y;
-    //    int index = iY + iX * gridSize.y;
-    //    return tileList[index];
-    //}
-    //
-    //public Pipe GetTileFromCoordinates(int x, int y)
-    //{
-    //    int index = y + x * gridSize.y;
-    //    return tileList[index];
-    //}
 }
