@@ -17,20 +17,23 @@ public class PipeManager : MonoBehaviour
         bankedPipe = GeneratePipe();
         bankedPipe.transform.SetParent(swapPipePosition.transform);
         bankedPipe.transform.localPosition = Vector3.zero;
-        bankedPipe.hidden = false;
-        bankedPipe.hiddenSprite.SetActive(false);
+        bankedPipe.Reveal();
     }
 
     public Pipe GeneratePipe()
     {
         Pipe temp = Instantiate(pipePrefabs[Random.Range(0, pipePrefabs.Length)]);
+        return temp;
+    }
 
+    public Pipe GeneratePipe(int i)
+    {
+        Pipe temp = Instantiate(pipePrefabs[i]);
         return temp;
     }
 
     public void SwapPipe(Pipe temp)
     {
-        
         if(temp != bankedPipe)
         {
             Transform pipeParent = temp.transform.parent;
@@ -42,4 +45,6 @@ public class PipeManager : MonoBehaviour
             bankedPipe = temp;
         }
     }
+
+   
 }

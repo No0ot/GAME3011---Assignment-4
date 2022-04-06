@@ -156,6 +156,8 @@ MonoBehaviour:
   gridSize: {x: 6, y: 6}
   tileSize: 0
   tilePrefab: {fileID: 6186356585328130126, guid: efea4876412e8e940b8e4570d7dfc70b, type: 3}
+  startPipe: {fileID: 0}
+  endPipe: {fileID: 0}
 --- !u!4 &449007793
 Transform:
   m_ObjectHideFlags: 0
@@ -183,17 +185,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pipePrefabs:
+  - {fileID: 1501770252914462357, guid: 34013c2c32a223d4e8a2b5ea10ef5a06, type: 3}
+  - {fileID: 1501770252914462357, guid: 305c00e963745ac49b157e3fbd823c56, type: 3}
   - {fileID: 1501770252914462357, guid: 5c13f2d3fdb9c6743b75d16c3ba07fc5, type: 3}
   - {fileID: 1501770252914462357, guid: 0e226e2abffdd5a45941ed4330e07f58, type: 3}
   - {fileID: 1501770252914462357, guid: f47b9164e9f4c0440a6f3dc6d43c0c0d, type: 3}
-  - {fileID: 1501770252914462357, guid: 34013c2c32a223d4e8a2b5ea10ef5a06, type: 3}
   - {fileID: 1501770252914462357, guid: 0dc653f6803dd1a499c07fa2744e876c, type: 3}
   - {fileID: 1501770252914462357, guid: 8c79d78514aaa104cb83ab80edfa6d6b, type: 3}
   - {fileID: 1501770252914462357, guid: 3e9037c966e57824d83393d290ecf973, type: 3}
   - {fileID: 1501770252914462357, guid: 8043fdbffb5b89543868db9587def4f8, type: 3}
   - {fileID: 1501770252914462357, guid: 08b699e353c5528459e8b6f8820551dc, type: 3}
   - {fileID: 1501770252914462357, guid: 69b3002d41c760b40a1e578f98dc01a3, type: 3}
-  - {fileID: 1501770252914462357, guid: 305c00e963745ac49b157e3fbd823c56, type: 3}
   swapPipePosition: {fileID: 957218730}
   bankedPipe: {fileID: 0}
 --- !u!1 &519420028

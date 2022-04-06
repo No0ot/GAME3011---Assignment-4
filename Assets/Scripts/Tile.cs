@@ -14,7 +14,7 @@ public class Tile : MonoBehaviour
 {
     public Tile[] neighbours;
     public Pipe occupyingPipe = null;
-
+    public Vector2Int coordinates;
 
     public Tile[] GetNeighboursArray()
     {
@@ -35,5 +35,17 @@ public class Tile : MonoBehaviour
     public TileDirections GetOppositeNeighbour(TileDirections direction)
     {
         return (int)direction < 2 ? (direction + 2) : (direction - 2);
+    }
+
+    public void OnMouseDown()
+    {
+        if (occupyingPipe.hidden)
+        {
+            occupyingPipe.Reveal();
+        }
+        else
+        {
+            PipeManager.instance.SwapPipe(occupyingPipe);
+        }
     }
 }

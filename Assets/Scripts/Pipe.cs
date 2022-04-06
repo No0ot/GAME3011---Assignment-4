@@ -16,19 +16,49 @@ public class Pipe : MonoBehaviour
     public TileConnections[] connections;
 
     public float fillPercent = 0.0f;
+    public float fillRate = 20f;
+
     public bool hidden = true;
     public GameObject hiddenSprite;
+    public SpriteRenderer fillSprite;
 
-    public void OnMouseDown()
+    public bool fill = false;
+
+    public void Reveal()
     {
-        if (hidden)
+        hidden = false;
+        hiddenSprite.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if(fill)
         {
-            hidden = false;
-            hiddenSprite.SetActive(false);
+            if (fillPercent < 100f)
+            {
+                fillPercent += fillRate * Time.deltaTime;
+                fillSprite.color = new Color(1, 1, 1, (fillPercent / 100));
+            }
+            else
+            {
+                fill = false;
+            }
         }
-        else
+    }
+
+    public void GetNextFillTiles(TileDirections initialDirection)
+    {
+        List<Pipe> nextPipes = new List<Pipe>();
+
+        foreach(TileConnections connection in connections)
         {
-            PipeManager.instance.SwapPipe(this);
+            if(connection.direction != initialDirection)
+            {
+                if(connection.canConnect)
+                {
+                    nextPipes.Add();
+                }
+            }
         }
     }
 }

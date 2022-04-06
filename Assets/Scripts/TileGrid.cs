@@ -11,8 +11,9 @@ public class TileGrid : MonoBehaviour
     List<Tile> tileList = new List<Tile>();
 
     PipeManager pipeManager;
-    // Start is called before the first frame update
 
+    public Pipe startPipe = null;
+    public Pipe endPipe = null;
     private void Awake()
     {
         tileSize = tilePrefab.GetComponent<SpriteRenderer>().bounds.extents.x * 2;
@@ -22,6 +23,8 @@ public class TileGrid : MonoBehaviour
     void Start()
     {
         RegenerateGrid();
+        CreateStartAndEndPipes();
+        startPipe.fill = true;
     }
 
     private void RegenerateGrid()
@@ -39,6 +42,7 @@ public class TileGrid : MonoBehaviour
     {
         Tile temp = Instantiate(tilePrefab, this.transform);
         temp.transform.position = new Vector3(x * tileSize, y * tileSize);
+        temp.coordinates = new Vector2Int(x, y);
 
         if (index > -1)
             tileList.Insert(index, temp);
@@ -59,5 +63,68 @@ public class TileGrid : MonoBehaviour
         pipeTemp.transform.SetParent(temp.transform);
         temp.occupyingPipe = pipeTemp;
         pipeTemp.transform.localPosition = Vector3.zero;
+    }
+
+    public void CreateStartAndEndPipes()
+    {
+        int startSide = Random.Range(0, 2);
+
+        if(startSide > 0)
+        {
+            int x = Random.Range(0, gridSize.x);
+
+            Pipe pipeTemp = pipeManager.GeneratePipe(1);
+            pipeTemp.transform.position = new Vector3(x * tileSize, -1 * tileSize);
+            startPipe = pipeTemp;
+
+            Pipe nextPipe = GetTileFromCoordinates(x, 0).occupyingPipe;
+            nextPipe.Reveal();
+        }
+        else
+        {
+            int y = Random.Range(0, gridSize.y);
+            Pipe pipeTemp = pipeManager.GeneratePipe(0);
+            pipeTemp.transform.position = new Vector3(-1 * tileSize, y * tileSize);
+            startPipe = pipeTemp;
+
+            Pipe nextPipe = GetTileFromCoordinates(0, y).occupyingPipe;
+            nextPipe.Reveal();
+        }
+
+        startPipe.Reveal();
+
+        int endSide = Random.Range(0, 2);
+
+        if(endSide > 0)
+        {
+            int x = Random.Range(0, gridSize.x);
+
+            Pipe pipeTemp = pipeManager.GeneratePipe(1);
+            pipeTemp.transform.position = new Vector3(x * tileSize, (gridSize.y) * tileSize);
+            endPipe = pipeTemp;
+        }
+        else
+        {
+            int y = Random.Range(0, gridSize.y);
+            Pipe pipeTemp = pipeManager.GeneratePipe(0);
+            pipeTemp.transform.position = new Vector3((gridSize.x) * tileSize, y * tileSize);
+            endPipe = pipeTemp;
+        }
+
+        endPipe.Reveal();
+    }
+
+    public Tile GetTileFromCoordinates(Vector2Int coordinates)
+    {
+        int iX = coordinates.x;
+        int iY = coordinates.y;
+        int index = iY + iX * gridSize.y;
+        return tileList[index];
+    }
+
+    public Tile GetTileFromCoordinates(int x, int y)
+    {
+        int index = y + x * gridSize.y;
+        return tileList[index];
     }
 }
