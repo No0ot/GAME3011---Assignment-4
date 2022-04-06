@@ -10,10 +10,14 @@ public class PipeManager : MonoBehaviour
     public GameObject swapPipePosition;
 
     public Pipe bankedPipe = null;
+    public TileGrid grid;
+
 
     private void Awake()
     {
+
         instance = this;
+        grid = GetComponent<TileGrid>();
         bankedPipe = GeneratePipe();
         bankedPipe.transform.SetParent(swapPipePosition.transform);
         bankedPipe.transform.localPosition = Vector3.zero;
@@ -34,15 +38,21 @@ public class PipeManager : MonoBehaviour
 
     public void SwapPipe(Pipe temp)
     {
-        if(temp != bankedPipe)
+        if(temp != bankedPipe && !temp.fill && !temp.locked)
         {
             Transform pipeParent = temp.transform.parent;
+            Vector2Int coord = temp.coordinates;
             bankedPipe.transform.SetParent(pipeParent);
-            bankedPipe.transform.localPosition = Vector3.zero;
+            bankedPipe.transform.position = new Vector3(coord.x * TileGrid.tileSize, coord.y * TileGrid.tileSize);
+            bankedPipe.coordinates = coord;
+            grid.tileList[coord.x, coord.y] = bankedPipe;
+            grid.SetNewNeighbours(bankedPipe);
 
             temp.transform.SetParent(swapPipePosition.transform);
             temp.transform.localPosition = Vector3.zero;
+            temp.coordinates = new Vector2Int(-1, -1);
             bankedPipe = temp;
+            bankedPipe.ClearNeighbours();
         }
     }
 

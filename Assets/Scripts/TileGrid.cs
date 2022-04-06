@@ -5,10 +5,11 @@ using UnityEngine;
 public class TileGrid : MonoBehaviour
 {
     public Vector2Int gridSize =  new Vector2Int(6,6);
-    public float tileSize;
-    public Tile tilePrefab;
+    public static float tileSize;
 
-    List<Tile> tileList = new List<Tile>();
+    public GameObject pipePrefab;
+
+    public Pipe[,] tileList;
 
     PipeManager pipeManager;
 
@@ -16,12 +17,13 @@ public class TileGrid : MonoBehaviour
     public Pipe endPipe = null;
     private void Awake()
     {
-        tileSize = tilePrefab.GetComponent<SpriteRenderer>().bounds.extents.x * 2;
+        tileSize = pipePrefab.GetComponent<SpriteRenderer>().bounds.extents.x * 2;
         pipeManager = GetComponent<PipeManager>();
     }
 
     void Start()
     {
+        tileList = new Pipe[gridSize.x, gridSize.y];
         RegenerateGrid();
         CreateStartAndEndPipes();
         startPipe.fill = true;
@@ -40,29 +42,22 @@ public class TileGrid : MonoBehaviour
 
     private void GenerateTile(int x, int y, int index)
     {
-        Tile temp = Instantiate(tilePrefab, this.transform);
+        Pipe temp = pipeManager.GeneratePipe();
+        //Tile temp = Instantiate(tilePrefab, this.transform);
+        temp.transform.SetParent(this.transform);
         temp.transform.position = new Vector3(x * tileSize, y * tileSize);
         temp.coordinates = new Vector2Int(x, y);
 
-        if (index > -1)
-            tileList.Insert(index, temp);
-        else
-            tileList.Add(temp);
+        tileList[x, y] = temp;
 
         if (x > 0)
         {
-           temp.SetNeighbour(TileDirections.LEFT, tileList[index - gridSize.x]);
+           temp.SetNeighbour(TileDirections.LEFT, tileList[x - 1, y]);
         }
         if (y > 0)
         {
-            temp.SetNeighbour(TileDirections.DOWN, tileList[index - 1]);
+            temp.SetNeighbour(TileDirections.DOWN, tileList[x, y - 1]);
         }
-
-        Pipe pipeTemp = pipeManager.GeneratePipe();
-
-        pipeTemp.transform.SetParent(temp.transform);
-        temp.occupyingPipe = pipeTemp;
-        pipeTemp.transform.localPosition = Vector3.zero;
     }
 
     public void CreateStartAndEndPipes()
@@ -76,8 +71,9 @@ public class TileGrid : MonoBehaviour
             Pipe pipeTemp = pipeManager.GeneratePipe(1);
             pipeTemp.transform.position = new Vector3(x * tileSize, -1 * tileSize);
             startPipe = pipeTemp;
+            startPipe.coordinates = new Vector2Int(x, -1);
 
-            Pipe nextPipe = GetTileFromCoordinates(x, 0).occupyingPipe;
+            Pipe nextPipe = tileList[x, 0];
             nextPipe.Reveal();
         }
         else
@@ -86,12 +82,14 @@ public class TileGrid : MonoBehaviour
             Pipe pipeTemp = pipeManager.GeneratePipe(0);
             pipeTemp.transform.position = new Vector3(-1 * tileSize, y * tileSize);
             startPipe = pipeTemp;
+            startPipe.coordinates = new Vector2Int(-1, y);
 
-            Pipe nextPipe = GetTileFromCoordinates(0, y).occupyingPipe;
+            Pipe nextPipe = tileList[0, y];
             nextPipe.Reveal();
         }
 
         startPipe.Reveal();
+        startPipe.locked = true;
 
         int endSide = Random.Range(0, 2);
 
@@ -112,19 +110,74 @@ public class TileGrid : MonoBehaviour
         }
 
         endPipe.Reveal();
+        endPipe.locked = true;
     }
 
-    public Tile GetTileFromCoordinates(Vector2Int coordinates)
+    public void SetNewNeighbours(Pipe initial)
     {
-        int iX = coordinates.x;
-        int iY = coordinates.y;
-        int index = iY + iX * gridSize.y;
-        return tileList[index];
+        Vector2Int temp = initial.coordinates;
+
+        if(temp.y + 1 < gridSize.y)
+        {
+            initial.SetNeighbour(TileDirections.UP, tileList[temp.x, temp.y + 1]);
+        }
+        if(temp.y - 1 > 0)
+        {
+            initial.SetNeighbour(TileDirections.DOWN, tileList[temp.x, temp.y - 1]);
+        }
+        if (temp.x + 1 < gridSize.x)
+        {
+            initial.SetNeighbour(TileDirections.RIGHT, tileList[temp.x + 1, temp.y]);
+        }
+        if (temp.x - 1 > 0)
+        {
+            initial.SetNeighbour(TileDirections.LEFT, tileList[temp.x - 1, temp.y]);
+        }
     }
 
-    public Tile GetTileFromCoordinates(int x, int y)
+    public Pipe GetNextTileInDirection(Vector2Int initial, TileDirections direction)
     {
-        int index = y + x * gridSize.y;
-        return tileList[index];
+        switch(direction)
+        {
+            case TileDirections.UP:
+                if (initial.y + 1 < gridSize.y)
+                {
+                    return tileList[initial.x, initial.y + 1];
+                }
+                break;
+            case TileDirections.LEFT:
+                if (initial.x - 1 > 0)
+                {
+                    return tileList[initial.x - 1, initial.y];
+                }
+                break;
+            case TileDirections.DOWN:
+                if (initial.y - 1 > 0)
+                {
+                    return tileList[initial.x, initial.y - 1];
+                }
+                break;
+            case TileDirections.RIGHT:
+                if (initial.x + 1 < gridSize.x)
+                {
+                    return tileList[initial.x + 1, initial.y];
+                }
+                break;
+        }
+        return null;
     }
+
+    //public Pipe GetTileFromCoordinates(Vector2Int coordinates)
+    //{
+    //    int iX = coordinates.x;
+    //    int iY = coordinates.y;
+    //    int index = iY + iX * gridSize.y;
+    //    return tileList[index];
+    //}
+    //
+    //public Pipe GetTileFromCoordinates(int x, int y)
+    //{
+    //    int index = y + x * gridSize.y;
+    //    return tileList[index];
+    //}
 }
