@@ -27,7 +27,6 @@ public class Pipe : MonoBehaviour
     public TileConnections[] connections;
 
     public float fillPercent = 0.0f;
-    public float fillRate = 20f;
 
     public bool hidden = true;
     public GameObject hiddenSprite;
@@ -36,6 +35,7 @@ public class Pipe : MonoBehaviour
     public bool fill = false;
     public bool locked = false;
     public bool fillComplete = false;
+    public bool goalPipe = false;
 
     public void Reveal()
     {
@@ -45,16 +45,24 @@ public class Pipe : MonoBehaviour
 
     private void Update()
     {
-        if(fill)
+        if (!MiniGameManager.instance.gameComplete)
         {
-            if (fillPercent < 100f)
+            if (fill && !fillComplete)
             {
-                fillPercent += fillRate * Time.deltaTime;
-                fillSprite.color = new Color(1, 1, 1, (fillPercent / 100));
-            }
-            else
-            {
-                GetNextFillTiles();
+                if (fillPercent < 100f)
+                {
+                    fillPercent += MiniGameManager.instance.fillRate * Time.deltaTime;
+                    fillSprite.color = new Color(1, 1, 1, (fillPercent / 100));
+                }
+                else
+                {
+                    if (goalPipe)
+                    {
+                        MiniGameManager.instance.gameComplete = true;
+                        UIManager.instance.winPanel.SetActive(true);
+                    }
+                    GetNextFillTiles();
+                }
             }
         }
     }
@@ -77,7 +85,6 @@ public class Pipe : MonoBehaviour
                         // This is a crazy line of code, basically checks the next tile to see if the connection in the opposite direction is possible
                         if (temp.connections[(int)GetOppositeNeighbour(connection.direction)].canConnect)
                         {
-                            
                             nextPipes.Add(temp);
                         }
                     }
@@ -86,11 +93,17 @@ public class Pipe : MonoBehaviour
             
         }
 
+        if(nextPipes.Count == 0)
+        {
+            MiniGameManager.instance.gameComplete = true;
+            UIManager.instance.losePanel.SetActive(true);
+        }
+
         foreach(Pipe temp in nextPipes)
         {
-            //Debug.Log(temp.coordinates);
             temp.fill = true;
         }
+
         fillComplete = true;
     }
 

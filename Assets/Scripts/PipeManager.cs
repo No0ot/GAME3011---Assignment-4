@@ -43,7 +43,7 @@ public class PipeManager : MonoBehaviour
             Transform pipeParent = temp.transform.parent;
             Vector2Int coord = temp.coordinates;
             bankedPipe.transform.SetParent(pipeParent);
-            bankedPipe.transform.position = new Vector3(coord.x * TileGrid.tileSize, coord.y * TileGrid.tileSize);
+            bankedPipe.transform.position = new Vector3((coord.x * TileGrid.tileSize) + grid.gridOffset.x, (coord.y * TileGrid.tileSize) + grid.gridOffset.y);
             bankedPipe.coordinates = coord;
             grid.tileList[coord.x, coord.y] = bankedPipe;
             grid.SetNewNeighbours(bankedPipe);

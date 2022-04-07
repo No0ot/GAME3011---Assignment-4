@@ -8,6 +8,8 @@ public class TileGrid : MonoBehaviour
     public Vector2Int gridSize =  new Vector2Int(6,6);
     public static float tileSize;
 
+    public Vector2 gridOffset;
+
     public GameObject pipePrefab;
 
     [Serializable]
@@ -69,7 +71,7 @@ public class TileGrid : MonoBehaviour
         Pipe temp = pipeManager.GeneratePipe();
         //Tile temp = Instantiate(tilePrefab, this.transform);
         temp.transform.SetParent(this.transform);
-        temp.transform.position = new Vector3(x * tileSize, y * tileSize);
+        temp.transform.position = new Vector3((x * tileSize) + gridOffset.x, (y * tileSize) + gridOffset.y);
         temp.coordinates = new Vector2Int(x, y);
 
         tileList[x, y] = temp;
@@ -93,7 +95,7 @@ public class TileGrid : MonoBehaviour
             int x = UnityEngine.Random.Range(0, gridSize.x);
 
             Pipe pipeTemp = pipeManager.GeneratePipe(1);
-            pipeTemp.transform.position = new Vector3(x * tileSize, -1 * tileSize);
+            pipeTemp.transform.position = new Vector3((x * tileSize) + gridOffset.x, (-1 * tileSize) + gridOffset.y);
             startPipe = pipeTemp;
             startPipe.coordinates = new Vector2Int(x, -1);
 
@@ -104,14 +106,14 @@ public class TileGrid : MonoBehaviour
         {
             int y = UnityEngine.Random.Range(0, gridSize.y);
             Pipe pipeTemp = pipeManager.GeneratePipe(0);
-            pipeTemp.transform.position = new Vector3(-1 * tileSize, y * tileSize);
+            pipeTemp.transform.position = new Vector3((-1 * tileSize) + gridOffset.x, (y * tileSize) + gridOffset.y);
             startPipe = pipeTemp;
             startPipe.coordinates = new Vector2Int(-1, y);
 
             Pipe nextPipe = tileList[0, y];
             nextPipe.Reveal();
         }
-
+        startPipe.transform.SetParent(this.transform);
         startPipe.Reveal();
         startPipe.locked = true;
 
@@ -122,7 +124,7 @@ public class TileGrid : MonoBehaviour
             int x = UnityEngine.Random.Range(0, gridSize.x);
 
             Pipe pipeTemp = pipeManager.GeneratePipe(1);
-            pipeTemp.transform.position = new Vector3(x * tileSize, (gridSize.y) * tileSize);
+            pipeTemp.transform.position = new Vector3((x * tileSize) + gridOffset.x, ((gridSize.y) * tileSize) + gridOffset.y);
             endPipe = pipeTemp;
             endPipe.coordinates = new Vector2Int(x, gridSize.y);
         }
@@ -130,15 +132,16 @@ public class TileGrid : MonoBehaviour
         {
             int y = UnityEngine.Random.Range(0, gridSize.y);
             Pipe pipeTemp = pipeManager.GeneratePipe(0);
-            pipeTemp.transform.position = new Vector3((gridSize.x) * tileSize, y * tileSize);
+            pipeTemp.transform.position = new Vector3(((gridSize.x) * tileSize) + gridOffset.x, (y * tileSize) + gridOffset.y);
             endPipe = pipeTemp;
             endPipe.coordinates = new Vector2Int(gridSize.x, y);
         }
 
         tileList[endPipe.coordinates.x, endPipe.coordinates.y] = endPipe;
-        Debug.Log(tileList[endPipe.coordinates.x, endPipe.coordinates.y].coordinates);
+        endPipe.transform.SetParent(this.transform);
         endPipe.Reveal();
         endPipe.locked = true;
+        endPipe.goalPipe = true;
     }
 
     public void SetNewNeighbours(Pipe initial)
