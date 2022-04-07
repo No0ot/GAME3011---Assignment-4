@@ -23,14 +23,33 @@ public class MiniGameManager : MonoBehaviour
     private void Awake()
     {
         instance = this;
+        gameObject.SetActive(false);
     }
 
+    private void OnDisable()
+    {
+        gameComplete = false;
+        
+    }
+
+    private void OnEnable()
+    {
+        fillRate = 50f - (hackingSkill * 3f);
+        //fillRate = 20f;
+
+    }
 
     private void Update()
     {
         if(Input.GetKeyDown(KeyCode.Space))
         {
-            fillRate = 200f;
+            fillRate = 500f;
         }
     }
+
+    public void SetDifficulty(int diff)
+    {
+        difficulty = (Difficulty)diff;
+    }
+
 }

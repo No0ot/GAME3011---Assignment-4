@@ -61,7 +61,8 @@ public class Pipe : MonoBehaviour
                         MiniGameManager.instance.gameComplete = true;
                         UIManager.instance.winPanel.SetActive(true);
                     }
-                    GetNextFillTiles();
+                    else
+                        GetNextFillTiles();
                 }
             }
         }
@@ -69,6 +70,7 @@ public class Pipe : MonoBehaviour
 
     public void GetNextFillTiles()
     {
+        Debug.Log(coordinates);
         fill = false;
         List<Pipe> nextPipes = new List<Pipe>();
 
@@ -80,7 +82,7 @@ public class Pipe : MonoBehaviour
 
                 if (temp)
                 {
-                    if (!temp.hidden && !fillComplete)
+                    if (!temp.hidden && !temp.fillComplete)
                     {
                         // This is a crazy line of code, basically checks the next tile to see if the connection in the opposite direction is possible
                         if (temp.connections[(int)GetOppositeNeighbour(connection.direction)].canConnect)
@@ -92,6 +94,8 @@ public class Pipe : MonoBehaviour
             }
             
         }
+
+        Debug.Log(nextPipes.Count);
 
         if(nextPipes.Count == 0)
         {

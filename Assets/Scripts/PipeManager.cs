@@ -15,7 +15,6 @@ public class PipeManager : MonoBehaviour
 
     private void Awake()
     {
-
         instance = this;
         grid = GetComponent<TileGrid>();
         bankedPipe = GeneratePipe();
@@ -26,7 +25,7 @@ public class PipeManager : MonoBehaviour
 
     public Pipe GeneratePipe()
     {
-        Pipe temp = Instantiate(pipePrefabs[Random.Range(0, 6)]);
+        Pipe temp = Instantiate(pipePrefabs[Random.Range(0, 6 + (int)MiniGameManager.instance.difficulty)]);
         return temp;
     }
 
@@ -38,21 +37,24 @@ public class PipeManager : MonoBehaviour
 
     public void SwapPipe(Pipe temp)
     {
-        if(temp != bankedPipe && !temp.fill && !temp.locked)
+        if (!MiniGameManager.instance.gameComplete)
         {
-            Transform pipeParent = temp.transform.parent;
-            Vector2Int coord = temp.coordinates;
-            bankedPipe.transform.SetParent(pipeParent);
-            bankedPipe.transform.position = new Vector3((coord.x * TileGrid.tileSize) + grid.gridOffset.x, (coord.y * TileGrid.tileSize) + grid.gridOffset.y);
-            bankedPipe.coordinates = coord;
-            grid.tileList[coord.x, coord.y] = bankedPipe;
-            grid.SetNewNeighbours(bankedPipe);
+            if (temp != bankedPipe && !temp.fill && !temp.locked && !temp.fillComplete)
+            {
+                Transform pipeParent = temp.transform.parent;
+                Vector2Int coord = temp.coordinates;
+                bankedPipe.transform.SetParent(pipeParent);
+                bankedPipe.transform.position = new Vector3((coord.x * TileGrid.tileSize) + grid.gridOffset.x, (coord.y * TileGrid.tileSize) + grid.gridOffset.y);
+                bankedPipe.coordinates = coord;
+                grid.tileList[coord.x, coord.y] = bankedPipe;
+                grid.SetNewNeighbours(bankedPipe);
 
-            temp.transform.SetParent(swapPipePosition.transform);
-            temp.transform.localPosition = Vector3.zero;
-            temp.coordinates = new Vector2Int(-1, -1);
-            bankedPipe = temp;
-            bankedPipe.ClearNeighbours();
+                temp.transform.SetParent(swapPipePosition.transform);
+                temp.transform.localPosition = Vector3.zero;
+                temp.coordinates = new Vector2Int(-1, -1);
+                bankedPipe = temp;
+                bankedPipe.ClearNeighbours();
+            }
         }
     }
 

@@ -17,6 +17,12 @@ public class UIManager : MonoBehaviour
         instance = this;    
     }
 
+    private void OnDisable()
+    {
+        losePanel.SetActive(false);
+        winPanel.SetActive(false);
+    }
+
     // Update is called once per frame
     void Update()
     {

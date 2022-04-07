@@ -5,24 +5,12 @@ using System;
 
 public class TileGrid : MonoBehaviour
 {
-    public Vector2Int gridSize =  new Vector2Int(6,6);
+    public Vector2Int gridSize =  new Vector2Int(7,7);
     public static float tileSize;
 
     public Vector2 gridOffset;
 
     public GameObject pipePrefab;
-
-    [Serializable]
-    public struct TileArray
-    {
-        TileArray(int arraySize)
-        {
-            rowTiles = new Pipe[arraySize];
-        }
-        public Pipe[] rowTiles;
-    }
-    public TileArray[] debugArray;
-
 
     public Pipe[,] tileList;
 
@@ -36,23 +24,32 @@ public class TileGrid : MonoBehaviour
         pipeManager = GetComponent<PipeManager>();
     }
 
-    void Start()
+    private void OnDisable()
     {
+        for (int i = 0; i < gridSize.x; i++)
+        {
+            for (int j = 0; j < gridSize.y; j++)
+            {
+                Destroy(tileList[i, j].gameObject);
+                tileList[i, j] = null;
+            }
+        }
+        Destroy(startPipe.gameObject);
+        Destroy(endPipe.gameObject);
+        startPipe = null;
+        endPipe = null;
+        
+    }
+
+    private void OnEnable()
+    {
+        gridSize = new Vector2Int(8 - (int)MiniGameManager.instance.difficulty, 8 - (int)MiniGameManager.instance.difficulty);
+
         tileList = new Pipe[gridSize.x + 1, gridSize.y + 1];
         RegenerateGrid();
         CreateStartAndEndPipes();
-        startPipe.fill = true;
-
-        debugArray = new TileArray[gridSize.y + 1];
-
-        for (int i = 0; i < gridSize.x + 1; i++)
-        {
-            debugArray[i].rowTiles = new Pipe[gridSize.x + 1];
-            for (int j = 0; j < gridSize.y + 1; j++)
-            {
-                debugArray[i].rowTiles[j] = tileList[i, j];
-            }
-        }
+        StartCoroutine(StartFillingFirstPipe());
+        //startPipe.fill = true;
     }
 
     private void RegenerateGrid()
@@ -100,6 +97,17 @@ public class TileGrid : MonoBehaviour
             startPipe.coordinates = new Vector2Int(x, -1);
 
             Pipe nextPipe = tileList[x, 0];
+
+            while(nextPipe.locked)
+            {
+                Debug.Log("ITS HAPPENING");
+                Destroy(nextPipe.gameObject);
+                nextPipe = pipeManager.GeneratePipe();
+                tileList[x, 0] = nextPipe;
+                nextPipe.coordinates = new Vector2Int(x, 0);
+                nextPipe.transform.position = new Vector3((nextPipe.coordinates.x * tileSize) + gridOffset.x, (nextPipe.coordinates.y * tileSize) + gridOffset.y);
+            }
+
             nextPipe.Reveal();
         }
         else
@@ -111,6 +119,17 @@ public class TileGrid : MonoBehaviour
             startPipe.coordinates = new Vector2Int(-1, y);
 
             Pipe nextPipe = tileList[0, y];
+
+            while (nextPipe.locked)
+            {
+                Debug.Log("ITS HAPPENING");
+                Destroy(nextPipe.gameObject);
+                nextPipe = pipeManager.GeneratePipe();
+                tileList[0, y] = nextPipe;
+                nextPipe.coordinates = new Vector2Int(0, y);
+                nextPipe.transform.position = new Vector3((nextPipe.coordinates.x * tileSize) + gridOffset.x, (nextPipe.coordinates.y * tileSize) + gridOffset.y);
+            }
+
             nextPipe.Reveal();
         }
         startPipe.transform.SetParent(this.transform);
@@ -127,6 +146,18 @@ public class TileGrid : MonoBehaviour
             pipeTemp.transform.position = new Vector3((x * tileSize) + gridOffset.x, ((gridSize.y) * tileSize) + gridOffset.y);
             endPipe = pipeTemp;
             endPipe.coordinates = new Vector2Int(x, gridSize.y);
+
+            Pipe beforePipe = tileList[x, gridSize.y - 1];
+
+            while (beforePipe.locked)
+            {
+                Debug.Log("ITS HAPPENING END");
+                Destroy(beforePipe.gameObject);
+                beforePipe = pipeManager.GeneratePipe();
+                tileList[x, gridSize.y - 1] = beforePipe;
+                beforePipe.coordinates = new Vector2Int(x, gridSize.y - 1);
+                beforePipe.transform.position = new Vector3((beforePipe.coordinates.x * tileSize) + gridOffset.x, (beforePipe.coordinates.y * tileSize) + gridOffset.y);
+            }
         }
         else
         {
@@ -135,6 +166,18 @@ public class TileGrid : MonoBehaviour
             pipeTemp.transform.position = new Vector3(((gridSize.x) * tileSize) + gridOffset.x, (y * tileSize) + gridOffset.y);
             endPipe = pipeTemp;
             endPipe.coordinates = new Vector2Int(gridSize.x, y);
+
+            Pipe beforePipe = tileList[gridSize.x - 1, y];
+
+            while (beforePipe.locked)
+            {
+                Debug.Log("ITS HAPPENING END");
+                Destroy(beforePipe.gameObject);
+                beforePipe = pipeManager.GeneratePipe();
+                tileList[gridSize.x - 1, y] = beforePipe;
+                beforePipe.coordinates = new Vector2Int(gridSize.x - 1, y);
+                beforePipe.transform.position = new Vector3((beforePipe.coordinates.x * tileSize) + gridOffset.x, (beforePipe.coordinates.y * tileSize) + gridOffset.y);
+            }
         }
 
         tileList[endPipe.coordinates.x, endPipe.coordinates.y] = endPipe;
@@ -168,13 +211,12 @@ public class TileGrid : MonoBehaviour
 
     public Pipe GetNextTileInDirection(Vector2Int initial, TileDirections direction)
     {
-        
         switch(direction)
         {
             case TileDirections.UP:
                 if (initial.y + 1 < gridSize.y + 1)
                 {
-                    Debug.Log(tileList[initial.x, initial.y + 1].coordinates);
+                    //Debug.Log(tileList[initial.x, initial.y + 1].coordinates);
                     return tileList[initial.x, initial.y + 1];
                 }
                 break;
@@ -198,5 +240,11 @@ public class TileGrid : MonoBehaviour
                 break;
         }
         return null;
+    }
+
+    IEnumerator StartFillingFirstPipe()
+    {
+        yield return new WaitForSeconds(3.0f - (int)MiniGameManager.instance.difficulty);
+        startPipe.fill = true;
     }
 }
