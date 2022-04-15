@@ -244,7 +244,7 @@ public class TileGrid : MonoBehaviour
 
     IEnumerator StartFillingFirstPipe()
     {
-        yield return new WaitForSeconds(3.0f - (int)MiniGameManager.instance.difficulty);
+        yield return new WaitForSeconds(4.0f - (int)MiniGameManager.instance.difficulty);
         startPipe.fill = true;
     }
 }

@@ -52,4 +52,8 @@ public class MiniGameManager : MonoBehaviour
         difficulty = (Difficulty)diff;
     }
 
+    public void SetHackingSkill(float skill)
+    {
+        hackingSkill = (int)skill;
+    }
 }
